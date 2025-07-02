@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ingress Spoofing Reports Parser</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold text-center mb-6">Ingress Spoofing Reports Parser</h1>
+    <div class="mb-6">
+      <label for="jsonInput" class="block text-lg font-medium mb-2">Paste JSON Data Here:</label>
+      <textarea id="jsonInput" rows="10" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      <button onclick="parseAndDisplay()" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Parse and Display</button>
+    </div>
+    <div id="error" class="hidden text-red-600 mb-4"></div>
+    <div id="reports" class="space-y-6"></div>
+  </div>
+
+  <script>
+    function parseAndDisplay() {
+      const jsonInput = document.getElementById('jsonInput').value;
+      const errorDiv = document.getElementById('error');
+      const reportsDiv = document.getElementById('reports');
+
+      try {
+        const data = JSON.parse(jsonInput);
+        if (!data.requests || !Array.isArray(data.requests)) {
+          throw new Error('Invalid JSON format: "requests" array not found');
+        }
+
+        errorDiv.classList.add('hidden');
+        reportsDiv.innerHTML = '';
+
+        data.requests.forEach(request => {
+          const reportDiv = document.createElement('div');
+          reportDiv.className = 'bg-white p-4 rounded-md shadow-md';
+
+          reportDiv.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">Report ID: ${request.id}</h2>
+            <p><strong>Subject:</strong> ${request.subject}</p>
+            <p><strong>Status:</strong> ${request.status}</p>
+            <p><strong>Created At:</strong> ${new Date(request.created_at).toLocaleString()}</p>
+            <p><strong>Updated At:</strong> ${new Date(request.updated_at).toLocaleString()}</p>
+            <p><strong>Location:</strong> <a href="${request.custom_fields.find(f => f.id === 36497568959387)?.value}" target="_blank" class="text-blue-500 hover:underline">View on Map</a></p>
+            <p><strong>Time Reported:</strong> ${request.custom_fields.find(f => f.id === 36497613570587)?.value}</p>
+            <p><strong>Agent:</strong> ${request.custom_fields.find(f => f.id === 36497463550747)?.value}</p>
+            <h3 class="text-lg font-medium mt-4 mb-2">Description:</h3>
+            <p class="text-gray-700">${formatDescription(request.description)}</p>
+          `;
+
+          reportsDiv.appendChild(reportDiv);
+        });
+      } catch (error) {
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = `Error: ${error.message}`;
+        reportsDiv.innerHTML = '';
+      }
+    }
+
+    function formatDescription(description) {
+      return description.replace(/\n/g, '<br>');
+    }
+  </script>
+</body>
+</html>
