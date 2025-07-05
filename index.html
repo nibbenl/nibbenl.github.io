@@ -33,7 +33,7 @@
         errorDiv.classList.add('hidden');
         reportsDiv.innerHTML = '';
 
-        data.requests.forEach(request => {
+        data.requests.forEach((request, index) => {
           const reportDiv = document.createElement('div');
           reportDiv.className = 'bg-white p-4 rounded-md shadow-md';
 
@@ -46,8 +46,11 @@
             <p><strong>Location:</strong> <a href="${request.custom_fields.find(f => f.id === 36497568959387)?.value}" target="_blank" class="text-blue-500 hover:underline">View on Map</a></p>
             <p><strong>Time Reported:</strong> ${request.custom_fields.find(f => f.id === 36497613570587)?.value}</p>
             <p><strong>Agent:</strong> ${request.custom_fields.find(f => f.id === 36497463550747)?.value}</p>
-            <h3 class="text-lg font-medium mt-4 mb-2">Description:</h3>
-            <p class="text-gray-700">${formatDescription(request.description)}</p>
+            <h3 class="text-lg font-medium mt-4 mb-2">Show Description:</h3>
+            <label class="inline-flex items-center mb-2">
+              <input type="checkbox" onchange="toggleDescription(${index})" class="form-checkbox h-5 w-5 text-blue-600">
+            </label>
+            <div id="description-${index}" class="text-gray-700" style="display: none;">${formatDescription(request.description)}</div>
           `;
 
           reportsDiv.appendChild(reportDiv);
@@ -61,6 +64,11 @@
 
     function formatDescription(description) {
       return description.replace(/\n/g, '<br>');
+    }
+
+    function toggleDescription(index) {
+      const descriptionDiv = document.getElementById(`description-${index}`);
+      descriptionDiv.style.display = descriptionDiv.style.display === 'none' ? 'block' : 'none';
     }
   </script>
 </body>
